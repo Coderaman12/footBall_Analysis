@@ -1,0 +1,10 @@
+
+yolov8x.pt
+*__pycahce__*
+*.pyc
+runs
+models
+input_video
+output_video
+training
+.venv
