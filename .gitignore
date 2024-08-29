@@ -5,6 +5,5 @@ yolov8x.pt
 runs
 models
 input_video
-output_videos
 training
 .venv
