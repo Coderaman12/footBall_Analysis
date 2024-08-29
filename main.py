@@ -5,6 +5,10 @@ import cv2
 from team_assigner import TeamAssigner
 from player_ball_assigner import PlayerBallAssigner
 import numpy as np
+from view_transformer import ViewTransformer
+from speed_and_distance_estimator import SpeedAndDistanceEstimator
+
+from camera_movement_estimator import CameraMovementEstimator
 
 def main():
     #read video
@@ -18,8 +22,27 @@ def main():
                                         read_from_stub=True,
                                         stub_path='stubs/track_stubs.pkl')
     
+    # get object position
+    tracker.add_position_to_tracks(tracks)
+    
+    # camera movement estimator
+    camera_movement_estimator = CameraMovementEstimator(video_frames[0])
+    camera_movement_per_frame = camera_movement_estimator.get_camera_movement(video_frames,
+                                                                                read_from_stub=True,
+                                                                                stub_path='stubs/camera_movement_stub.pkl')
+    camera_movement_estimator.add_adjust_positions_to_tracks(tracks,camera_movement_per_frame)
+    
+    # view transformer
+    view_transformer = ViewTransformer()
+    view_transformer.add_transformed_position_to_tracks(tracks)
+    
     # interpolate he ball position
     tracks['ball'] = tracker.interpolate_ball_positons(tracks['ball'])
+    
+    # Speed and distance estimator
+    speed_and_distance_estimator = SpeedAndDistanceEstimator()
+    speed_and_distance_estimator.add_speed_and_distance_to_tracks(tracks)
+    
     
     # ---- saved cropped image of a player ----
     # for track_id, player in tracks['players'][0].items():
@@ -70,6 +93,11 @@ def main():
     ## Draw object tracker
     output_video_frames = tracker.draw_annotations(video_frames,tracks,team_ball_control)
     
+    ## Draw Camera movement
+    output_video_frames = camera_movement_estimator.draw_camera_movement(output_video_frames,camera_movement_per_frame)
+    
+    ## Draw Speed and Distance
+    speed_and_distance_estimator.draw_speed_and_distance(output_video_frames,tracks)
     
     #save video
     save_video(output_video_frames,'output_videos/football_output.avi')

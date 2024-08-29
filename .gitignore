@@ -4,6 +4,5 @@ yolov8x.pt
 *.pyc
 runs
 models
-input_video
 training
 .venv
